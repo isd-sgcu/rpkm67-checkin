@@ -7,7 +7,7 @@ import (
 
 type Repository interface {
 	Create(checkin *model.Checkin) error
-	FindByEmail(email string, checkin *model.Checkin) error
+	FindByEmail(email string, checkins *[]*model.Checkin) error
 }
 
 type repositoryImpl struct {
@@ -22,6 +22,6 @@ func (r *repositoryImpl) Create(checkin *model.Checkin) error {
 	return r.Db.Create(checkin).Error
 }
 
-func (r *repositoryImpl) FindByEmail(email string, checkin *model.Checkin) error {
-	return r.Db.First(checkin, "email = ?", email).Error
+func (r *repositoryImpl) FindByEmail(email string, checkins *[]*model.Checkin) error {
+	return r.Db.Where("email = ?", email).Find(&checkins).Error
 }
