@@ -3,9 +3,9 @@ package checkin
 import (
 	"context"
 
-	"github.com/isd-sgcu/rpkm67-checkin/internal/model"
 	userRepo "github.com/isd-sgcu/rpkm67-checkin/internal/user"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
+	"github.com/isd-sgcu/rpkm67-model/model"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
@@ -33,7 +33,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 		s.log.Named("Create").Error("FindByEmail: ", zap.Error(err))
 		return nil, status.Error(codes.Internal, "internal error")
 	}
-	checkin := &model.Checkin{
+	checkin := &model.CheckIn{
 		Email: req.Email,
 		Event: req.Event,
 	}
@@ -50,7 +50,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 }
 
 func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailCheckInRequest) (*proto.FindByEmailCheckInResponse, error) {
-	var checkins []*model.Checkin
+	var checkins []*model.CheckIn
 	if err := s.repo.FindByEmail(req.Email, &checkins); err != nil {
 		s.log.Named("FindByEmail").Error("FindByEmail: ", zap.Error(err))
 		return nil, status.Error(codes.Internal, "internal error")
@@ -61,14 +61,14 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailCheck
 	}, nil
 }
 
-func ModelToProto(in *model.Checkin) *proto.CheckIn {
+func ModelToProto(in *model.CheckIn) *proto.CheckIn {
 	return &proto.CheckIn{
 		Email: in.Email,
 		Event: in.Event,
 	}
 }
 
-func ModelToProtoList(in []*model.Checkin) []*proto.CheckIn {
+func ModelToProtoList(in []*model.CheckIn) []*proto.CheckIn {
 	var out []*proto.CheckIn
 	for _, v := range in {
 		out = append(out, ModelToProto(v))
