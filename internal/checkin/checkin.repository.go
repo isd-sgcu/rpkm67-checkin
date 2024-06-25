@@ -1,13 +1,13 @@
 package checkin
 
 import (
-	"github.com/isd-sgcu/rpkm67-checkin/internal/model"
+	"github.com/isd-sgcu/rpkm67-model/model"
 	"gorm.io/gorm"
 )
 
 type Repository interface {
-	Create(checkin *model.Checkin) error
-	FindByEmail(email string, checkins *[]*model.Checkin) error
+	Create(checkIn *model.CheckIn) error
+	FindByEmail(email string, checkIns *[]*model.CheckIn) error
 }
 
 type repositoryImpl struct {
@@ -18,10 +18,10 @@ func NewRepository(db *gorm.DB) Repository {
 	return &repositoryImpl{Db: db}
 }
 
-func (r *repositoryImpl) Create(checkin *model.Checkin) error {
-	return r.Db.Create(checkin).Error
+func (r *repositoryImpl) Create(checkIn *model.CheckIn) error {
+	return r.Db.Create(checkIn).Error
 }
 
-func (r *repositoryImpl) FindByEmail(email string, checkins *[]*model.Checkin) error {
-	return r.Db.Where("email = ?", email).Find(&checkins).Error
+func (r *repositoryImpl) FindByEmail(email string, checkIns *[]*model.CheckIn) error {
+	return r.Db.Where("email = ?", email).Find(&checkIns).Error
 }

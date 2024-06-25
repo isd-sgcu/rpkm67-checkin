@@ -38,7 +38,7 @@ func main() {
 	checkinRepo := checkin.NewRepository(db)
 	checkinSvc := checkin.NewService(checkinRepo, logger.Named("checkinSvc"))
 
-	listener, err := net.Listen("tcp", fmt.Sprintf("%v", conf.App.Port))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", conf.App.Port))
 	if err != nil {
 		panic(fmt.Sprintf("Failed to listen: %v", err))
 	}
