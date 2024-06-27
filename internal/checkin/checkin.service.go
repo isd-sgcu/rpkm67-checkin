@@ -3,7 +3,6 @@ package checkin
 import (
 	"context"
 
-	userRepo "github.com/isd-sgcu/rpkm67-checkin/internal/user"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
 	"github.com/isd-sgcu/rpkm67-model/model"
 
@@ -18,9 +17,8 @@ type Service interface {
 
 type serviceImpl struct {
 	proto.UnimplementedCheckInServiceServer
-	repo     Repository
-	userRepo userRepo.Repository
-	log      *zap.Logger
+	repo Repository
+	log  *zap.Logger
 }
 
 func NewService(repo Repository, log *zap.Logger) Service {
@@ -28,14 +26,10 @@ func NewService(repo Repository, log *zap.Logger) Service {
 }
 
 func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest) (*proto.CreateCheckInResponse, error) {
-	var user model.User
-	if err := s.userRepo.FindByEmail(req.Email, &user); err != nil {
-		s.log.Named("Create").Error("FindByEmail: ", zap.Error(err))
-		return nil, status.Error(codes.Internal, "internal error")
-	}
 	checkin := &model.CheckIn{
-		Email: req.Email,
-		Event: req.Event,
+		Email:  req.Email,
+		Event:  req.Event,
+		UserID: req.UserId,
 	}
 
 	err := s.repo.Create(checkin)
@@ -61,10 +55,24 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailCheck
 	}, nil
 }
 
+func (s *serviceImpl) FindByUserId(_ context.Context, req *proto.FindByUserIdCheckInRequest) (*proto.FindByUserIdCheckInResponse, error) {
+	var checkins []*model.CheckIn
+	if err := s.repo.FindByUserId(req.UserId, &checkins); err != nil {
+		s.log.Named("FindByEmail").Error("FindByEmail: ", zap.Error(err))
+		return nil, status.Error(codes.Internal, "internal error")
+	}
+
+	return &proto.FindByUserIdCheckInResponse{
+		CheckIns: ModelToProtoList(checkins),
+	}, nil
+}
+
 func ModelToProto(in *model.CheckIn) *proto.CheckIn {
 	return &proto.CheckIn{
-		Email: in.Email,
-		Event: in.Event,
+		Id:     in.ID.String(),
+		Email:  in.Email,
+		Event:  in.Event,
+		UserId: in.UserID,
 	}
 }
 
