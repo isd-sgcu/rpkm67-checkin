@@ -58,7 +58,7 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailCheck
 func (s *serviceImpl) FindByUserId(_ context.Context, req *proto.FindByUserIdCheckInRequest) (*proto.FindByUserIdCheckInResponse, error) {
 	var checkins []*model.CheckIn
 	if err := s.repo.FindByUserId(req.UserId, &checkins); err != nil {
-		s.log.Named("FindByEmail").Error("FindByEmail: ", zap.Error(err))
+		s.log.Named("FindByUserId").Error("FindByUserId: ", zap.Error(err))
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
