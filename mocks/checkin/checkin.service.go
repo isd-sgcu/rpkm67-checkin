@@ -65,6 +65,21 @@ func (mr *MockServiceMockRecorder) FindByEmail(arg0, arg1 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByEmail", reflect.TypeOf((*MockService)(nil).FindByEmail), arg0, arg1)
 }
 
+// FindByUserId mocks base method.
+func (m *MockService) FindByUserId(arg0 context.Context, arg1 *v1.FindByUserIdCheckInRequest) (*v1.FindByUserIdCheckInResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByUserId", arg0, arg1)
+	ret0, _ := ret[0].(*v1.FindByUserIdCheckInResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByUserId indicates an expected call of FindByUserId.
+func (mr *MockServiceMockRecorder) FindByUserId(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUserId", reflect.TypeOf((*MockService)(nil).FindByUserId), arg0, arg1)
+}
+
 // mustEmbedUnimplementedCheckInServiceServer mocks base method.
 func (m *MockService) mustEmbedUnimplementedCheckInServiceServer() {
 	m.ctrl.T.Helper()
