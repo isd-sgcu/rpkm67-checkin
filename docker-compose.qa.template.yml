@@ -12,7 +12,7 @@ services:
       CORS_ORIGINS: http://localhost:3000
       SERVICE_AUTH: auth:3002
       SERVICE_BACKEND: backend:3003
-      SERVICE_CHECKIN: localhost:3004
+      SERVICE_CHECKIN: host.docker.internal:3004
       SERVICE_STORE: store:3005
     networks:
       - rpkm67
