@@ -4,8 +4,8 @@ go 1.21.5
 
 require (
 	github.com/golang/mock v1.6.0
-	github.com/isd-sgcu/rpkm67-go-proto v0.1.6
-	github.com/isd-sgcu/rpkm67-model v0.0.2
+	github.com/isd-sgcu/rpkm67-go-proto v0.1.7
+	github.com/isd-sgcu/rpkm67-model v0.0.4
 	github.com/stretchr/testify v1.8.1
 	google.golang.org/grpc v1.64.0
 	gorm.io/gorm v1.25.10
