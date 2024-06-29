@@ -63,11 +63,17 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 }
 
 func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailCheckInRequest) (*proto.FindByEmailCheckInResponse, error) {
+	if req.Email == "" {
+		s.log.Named("FindByUserEmail").Error("FindByUserEmail: invalid user ID")
+		return nil, status.Error(codes.InvalidArgument, "email cannot be empty")
+	}
+
 	var checkins []*model.CheckIn
-	if err := s.repo.FindByEmail(req.Email, &checkins); err != nil {
+	err := s.repo.FindByEmail(req.Email, &checkins)
+	if err != nil {
 		s.log.Named("FindByEmail").Error("FindByEmail: ", zap.Error(err))
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Error(codes.NotFound, "user not found")
+		if errors.Is(err, context.Canceled) {
+			return nil, status.Error(codes.Canceled, "request canceled by the client")
 		}
 		if errors.Is(err, gorm.ErrInvalidDB) {
 			return nil, status.Error(codes.Internal, "database connection error")
@@ -78,17 +84,28 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailCheck
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 
+	if len(checkins) == 0 {
+		s.log.Named("FindByUserEmail").Error("email not found")
+		return nil, status.Error(codes.NotFound, "email not found")
+	}
+
 	return &proto.FindByEmailCheckInResponse{
 		CheckIns: ModelToProtoList(checkins),
 	}, nil
 }
 
 func (s *serviceImpl) FindByUserId(_ context.Context, req *proto.FindByUserIdCheckInRequest) (*proto.FindByUserIdCheckInResponse, error) {
+	if req.UserId == "" {
+		s.log.Named("FindByUserId").Error("FindByUserId: invalid user ID")
+		return nil, status.Error(codes.InvalidArgument, "user ID cannot be empty")
+	}
+
 	var checkins []*model.CheckIn
-	if err := s.repo.FindByUserId(req.UserId, &checkins); err != nil {
+	err := s.repo.FindByUserId(req.UserId, &checkins)
+	if err != nil {
 		s.log.Named("FindByUserId").Error("FindByUserId: ", zap.Error(err))
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, status.Error(codes.NotFound, "user not found")
+		if errors.Is(err, context.Canceled) {
+			return nil, status.Error(codes.Canceled, "request canceled by the client")
 		}
 		if errors.Is(err, gorm.ErrInvalidDB) {
 			return nil, status.Error(codes.Internal, "database connection error")
@@ -97,6 +114,11 @@ func (s *serviceImpl) FindByUserId(_ context.Context, req *proto.FindByUserIdChe
 			return nil, status.Error(codes.DeadlineExceeded, "request timed out")
 		}
 		return nil, status.Error(codes.Internal, "internal error")
+	}
+
+	if len(checkins) == 0 {
+		s.log.Named("FindByUserId").Error("user not found")
+		return nil, status.Error(codes.NotFound, "user not found")
 	}
 
 	return &proto.FindByUserIdCheckInResponse{
