@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/isd-sgcu/rpkm67-model/model"
+	"github.com/isd-sgcu/rpkm67-checkin/internal/checkin"
+	mock_checkin "github.com/isd-sgcu/rpkm67-checkin/mocks/checkin"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
 )
@@ -12,9 +13,7 @@ import (
 type CheckinServiceTest struct {
 	suite.Suite
 	controller *gomock.Controller
-	Checkin *model.CheckIn
 	logger *zap.Logger
-	// More to be implemented
 }
 
 func TestPinService(t *testing.T) {
@@ -27,25 +26,33 @@ func (t *CheckinServiceTest) SetupTest() {
 }
 
 func (t *CheckinServiceTest) TestCreateSuccess() {
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
+
 
 }
 
 func (t *CheckinServiceTest) TestCreateFailed() {
-
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
 }
 
 func (t *CheckinServiceTest) TestFindByEmailSuccess() {
-
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
 }
 
 func (t *CheckinServiceTest) TestFindByEmailFailed() {
-	
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
 }
 
 func (t *CheckinServiceTest) TestFindByUserIdSuccess() {
-	
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
 }
 
 func (t *CheckinServiceTest) TestFindByUserIdFailed() {
-	
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
 }
