@@ -35,7 +35,13 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 	err := s.repo.Create(checkin)
 	if err != nil {
 		s.log.Named("Create").Error("Create: ", zap.Error(err))
+<<<<<<< HEAD
 		return nil, status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
+||||||| merged common ancestors
+		return nil, status.Error(codes.Internal, "internal error")
+=======
+		return nil, status.Error(codes.Internal, "Cannot create checkin: "+err.Error())
+>>>>>>> 98e0bfe09fff6620bc691ce8b87cd3035492afe5
 	}
 
 	return &proto.CreateCheckInResponse{
@@ -47,7 +53,13 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailCheck
 	var checkins []*model.CheckIn
 	if err := s.repo.FindByEmail(req.Email, &checkins); err != nil {
 		s.log.Named("FindByEmail").Error("FindByEmail: ", zap.Error(err))
+<<<<<<< HEAD
 		return nil,status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
+||||||| merged common ancestors
+		return nil, status.Error(codes.Internal, "internal error")
+=======
+		return nil, status.Error(codes.Internal, "Cannot find checkin: "+err.Error())
+>>>>>>> 98e0bfe09fff6620bc691ce8b87cd3035492afe5
 	}
 
 	return &proto.FindByEmailCheckInResponse{
@@ -59,7 +71,13 @@ func (s *serviceImpl) FindByUserId(_ context.Context, req *proto.FindByUserIdChe
 	var checkins []*model.CheckIn
 	if err := s.repo.FindByUserId(req.UserId, &checkins); err != nil {
 		s.log.Named("FindByUserId").Error("FindByUserId: ", zap.Error(err))
+<<<<<<< HEAD
 		return nil, status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
+||||||| merged common ancestors
+		return nil, status.Error(codes.Internal, "internal error")
+=======
+		return nil, status.Error(codes.Internal, "Cannot find checkin: "+err.Error())
+>>>>>>> 98e0bfe09fff6620bc691ce8b87cd3035492afe5
 	}
 
 	return &proto.FindByUserIdCheckInResponse{
