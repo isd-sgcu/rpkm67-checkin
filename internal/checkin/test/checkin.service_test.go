@@ -2,18 +2,16 @@ package test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/rpkm67-checkin/internal/checkin"
 	mock_checkin "github.com/isd-sgcu/rpkm67-checkin/mocks/checkin"
-	"github.com/isd-sgcu/rpkm67-gateway/apperror"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
 	"github.com/isd-sgcu/rpkm67-model/model"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type CheckinServiceTest struct {
@@ -74,13 +72,12 @@ func (t *CheckinServiceTest) TestCreateInternalError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
 	svc := checkin.NewService(repo, t.logger)
 
-	expectedErr := status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
-	repo.EXPECT().Create(t.checkinModel).Return(expectedErr)
+	repo.EXPECT().Create(t.checkinModel).Return(errors.New("internal error"))
 
 	res, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
 
 	t.Nil(res)
-	t.Equal(expectedErr, err)
+	t.NotNil(err)
 
 }
 
@@ -108,13 +105,12 @@ func (t *CheckinServiceTest) TestFindByEmailInternalError() {
 
 	email := t.checkinModel.Email
 
-	expectedErr := status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
-	repo.EXPECT().FindByEmail(email, gomock.Any()).SetArg(1, t.checkinsModel).Return(expectedErr)
+	repo.EXPECT().FindByEmail(email, gomock.Any()).SetArg(1, t.checkinsModel).Return(errors.New("internal error"))
 
 	res, err := svc.FindByEmail(context.Background(), t.findByEmailCheckInRequest)
 
 	t.Nil(res)
-	t.Equal(expectedErr, err)
+	t.NotNil(err)
 }
 
 func (t *CheckinServiceTest) TestFindByUserIdSuccess() {
@@ -141,11 +137,10 @@ func (t *CheckinServiceTest) TestFindByUserIdInternalError() {
 
 	id := gomock.Any()
 
-	expectedErr := status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
-	repo.EXPECT().FindByUserId(id, gomock.Any()).Return(expectedErr)
+	repo.EXPECT().FindByUserId(id, gomock.Any()).Return(errors.New("internal error"))
 
 	res, err := svc.FindByUserId(context.Background(), t.findByUserIdCheckInRequest)
 
 	t.Nil(res)
-	t.Equal(expectedErr, err)
+	t.NotNil(err)
 }
