@@ -7,7 +7,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/rpkm67-checkin/internal/checkin"
 	mock_checkin "github.com/isd-sgcu/rpkm67-checkin/mocks/checkin"
-	"github.com/isd-sgcu/rpkm67-gateway/apperror"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
 	"github.com/isd-sgcu/rpkm67-model/model"
 	"github.com/stretchr/testify/suite"
@@ -20,6 +19,7 @@ type CheckinServiceTest struct {
 	suite.Suite
 	controller 				   *gomock.Controller
 	logger 					   *zap.Logger
+	checkinsModel 			   []*model.CheckIn
 	checkinModel			   *model.CheckIn
 	checkinsProto 			   []*proto.CheckIn
 	checkinProto 			   *proto.CheckIn
@@ -35,9 +35,10 @@ func TestPinService(t *testing.T) {
 func (t *CheckinServiceTest) SetupTest() {
 	t.controller = gomock.NewController(t.T())
 	t.logger = zap.NewNop()
-	t.checkinModel = MockCheckInModel()
-	t.checkinProto = MockCheckInProto()
-	t.checkinsProto = MockCheckInsProto()
+	t.checkinsModel = MockCheckInsModel()
+	t.checkinModel = t.checkinsModel[0]
+	t.checkinsProto = checkin.ModelToProtoList(t.checkinsModel)
+	t.checkinProto = t.checkinsProto[0]
 	t.createCheckInProtoRequest = &proto.CreateCheckInRequest{
 		Email: t.checkinProto.Email,
 		UserId: t.checkinProto.UserId,
@@ -61,9 +62,9 @@ func (t *CheckinServiceTest) TestCreateSuccess() {
 	
 	repo.EXPECT().Create(t.checkinModel).Return(nil)
 
-	actual, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
+	res, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
 
-	t.Equal(actual, expectedResp)
+	t.Equal(res, expectedResp)
 	t.Nil(err)
 
 }
@@ -72,16 +73,45 @@ func (t *CheckinServiceTest) TestCreateInternalError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
 	svc := checkin.NewService(repo, t.logger)
 
-	expectedErr := status.Error(codes.Internal, apperror.InternalServer.Error())
+	expectedErr := status.Error(codes.Internal, "internal error")
 	repo.EXPECT().Create(t.checkinModel).Return(expectedErr)
 
 	res, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
 
 	t.Nil(res)
-	t.Equal(apperror.InternalServer, err)
+	t.Equal(expectedErr, err)
 
 }
 
 func (t *CheckinServiceTest) TestFindByEmailSuccess() {
-	
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
+
+	expectedResp := &proto.FindByEmailCheckInResponse {
+		CheckIns: t.checkinsProto,
+	}
+
+	email := t.checkinModel.Email
+
+	repo.EXPECT().FindByEmail(email, t.checkinsModel).Return(nil)
+
+	res, err := svc.FindByEmail(context.Background(), t.findByEmailCheckInRequest)
+
+	t.Nil(err)
+	t.Equal(expectedResp, res)
+}
+
+func (t *CheckinServiceTest) TestFindByEmailInternalError() {
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
+
+	email := t.checkinModel.Email
+
+	expectedErr := status.Error(codes.Internal, "internal error")
+	repo.EXPECT().FindByEmail(email, t.checkinsModel).Return(expectedErr)
+
+	res, err := svc.FindByEmail(context.Background(), t.findByEmailCheckInRequest)
+
+	t.Nil(res)
+	t.Equal(expectedErr, err)
 }

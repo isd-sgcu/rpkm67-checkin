@@ -2,7 +2,6 @@ package test
 
 import (
 	"github.com/bxcodec/faker/v4"
-	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
 	"github.com/isd-sgcu/rpkm67-model/model"
 )
 
@@ -14,21 +13,13 @@ func MockCheckInModel() *model.CheckIn {
 	}
 }
 
-func MockCheckInProto() *proto.CheckIn {
-	return &proto.CheckIn{
-		Id:     faker.UUIDDigit(),
-		UserId: faker.UUIDDigit(),
-		Email:  faker.Email(),
-	}
-}
-
-func MockCheckInsProto() []*proto.CheckIn {
-	var checkIns []*proto.CheckIn
+func MockCheckInsModel() []*model.CheckIn {
+	var checkIns []*model.CheckIn
 	for i := 0; i < 10; i++ {
-		checkIn := &proto.CheckIn{
-			Id:     faker.UUIDDigit(),
-			UserId: faker.UUIDDigit(),
-			Email:  faker.Email(),
+		checkIn := &model.CheckIn{
+			Event: faker.Word(),
+			Email: faker.Email(),
+			UserID: faker.UUIDDigit(),
 		}
 		checkIns = append(checkIns, checkIn)
 	}
