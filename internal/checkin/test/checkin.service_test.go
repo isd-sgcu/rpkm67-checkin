@@ -7,6 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/rpkm67-checkin/internal/checkin"
 	mock_checkin "github.com/isd-sgcu/rpkm67-checkin/mocks/checkin"
+	"github.com/isd-sgcu/rpkm67-gateway/apperror"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
 	"github.com/isd-sgcu/rpkm67-model/model"
 	"github.com/stretchr/testify/suite"
@@ -73,7 +74,7 @@ func (t *CheckinServiceTest) TestCreateInternalError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
 	svc := checkin.NewService(repo, t.logger)
 
-	expectedErr := status.Error(codes.Internal, "internal error")
+	expectedErr := status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
 	repo.EXPECT().Create(t.checkinModel).Return(expectedErr)
 
 	res, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
@@ -107,7 +108,7 @@ func (t *CheckinServiceTest) TestFindByEmailInternalError() {
 
 	email := t.checkinModel.Email
 
-	expectedErr := status.Error(codes.Internal, "internal error")
+	expectedErr := status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
 	repo.EXPECT().FindByEmail(email, gomock.Any()).SetArg(1, t.checkinsModel).Return(expectedErr)
 
 	res, err := svc.FindByEmail(context.Background(), t.findByEmailCheckInRequest)
@@ -140,7 +141,7 @@ func (t *CheckinServiceTest) TestFindByUserIdInternalError() {
 
 	id := gomock.Any()
 
-	expectedErr := status.Error(codes.Internal, "internal error")
+	expectedErr := status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
 	repo.EXPECT().FindByUserId(id, id).Return(expectedErr)
 
 	res, err := svc.FindByUserId(context.Background(), t.findByUserIdCheckInRequest)
