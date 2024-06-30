@@ -7,15 +7,20 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/isd-sgcu/rpkm67-checkin/internal/checkin"
 	mock_checkin "github.com/isd-sgcu/rpkm67-checkin/mocks/checkin"
+	"github.com/isd-sgcu/rpkm67-gateway/apperror"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
+	"github.com/isd-sgcu/rpkm67-model/model"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type CheckinServiceTest struct {
 	suite.Suite
 	controller 				   *gomock.Controller
 	logger 					   *zap.Logger
+	checkinModel			   *model.CheckIn
 	checkinsProto 			   []*proto.CheckIn
 	checkinProto 			   *proto.CheckIn
 	createCheckInProtoRequest  *proto.CreateCheckInRequest
@@ -30,6 +35,7 @@ func TestPinService(t *testing.T) {
 func (t *CheckinServiceTest) SetupTest() {
 	t.controller = gomock.NewController(t.T())
 	t.logger = zap.NewNop()
+	t.checkinModel = MockCheckInModel()
 	t.checkinProto = MockCheckInProto()
 	t.checkinsProto = MockCheckInsProto()
 	t.createCheckInProtoRequest = &proto.CreateCheckInRequest{
@@ -53,7 +59,7 @@ func (t *CheckinServiceTest) TestCreateSuccess() {
 		CheckIn: t.checkinProto,
 	}
 	
-	repo.EXPECT().Create(gomock.Any()).Return(expectedResp, nil)
+	repo.EXPECT().Create(t.checkinModel).Return(nil)
 
 	actual, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
 
@@ -62,27 +68,20 @@ func (t *CheckinServiceTest) TestCreateSuccess() {
 
 }
 
-func (t *CheckinServiceTest) TestCreateFailed() {
+func (t *CheckinServiceTest) TestCreateInternalError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
 	svc := checkin.NewService(repo, t.logger)
+
+	expectedErr := status.Error(codes.Internal, apperror.InternalServer.Error())
+	repo.EXPECT().Create(t.checkinModel).Return(expectedErr)
+
+	res, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
+
+	t.Nil(res)
+	t.Equal(apperror.InternalServer, err)
+
 }
 
 func (t *CheckinServiceTest) TestFindByEmailSuccess() {
-	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger)
-}
-
-func (t *CheckinServiceTest) TestFindByEmailFailed() {
-	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger)
-}
-
-func (t *CheckinServiceTest) TestFindByUserIdSuccess() {
-	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger)
-}
-
-func (t *CheckinServiceTest) TestFindByUserIdFailed() {
-	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger)
+	
 }

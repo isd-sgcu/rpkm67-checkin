@@ -3,6 +3,7 @@ package checkin
 import (
 	"context"
 
+	"github.com/isd-sgcu/rpkm67-gateway/apperror"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
 	"github.com/isd-sgcu/rpkm67-model/model"
 
@@ -35,7 +36,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 	err := s.repo.Create(checkin)
 	if err != nil {
 		s.log.Named("Create").Error("Create: ", zap.Error(err))
-		return nil, status.Error(codes.Internal, "internal error")
+		return nil, status.Error(codes.Internal, apperror.InternalServer.Error())
 	}
 
 	return &proto.CreateCheckInResponse{
