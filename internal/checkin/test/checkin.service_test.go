@@ -93,7 +93,7 @@ func (t *CheckinServiceTest) TestFindByEmailSuccess() {
 
 	email := t.checkinModel.Email
 
-	repo.EXPECT().FindByEmail(email, t.checkinsModel).Return(nil)
+	repo.EXPECT().FindByEmail(email, gomock.Any()).SetArg(1, t.checkinsModel).Return(nil)
 
 	res, err := svc.FindByEmail(context.Background(), t.findByEmailCheckInRequest)
 
@@ -108,9 +108,42 @@ func (t *CheckinServiceTest) TestFindByEmailInternalError() {
 	email := t.checkinModel.Email
 
 	expectedErr := status.Error(codes.Internal, "internal error")
-	repo.EXPECT().FindByEmail(email, t.checkinsModel).Return(expectedErr)
+	repo.EXPECT().FindByEmail(email, gomock.Any()).SetArg(1, t.checkinsModel).Return(expectedErr)
 
 	res, err := svc.FindByEmail(context.Background(), t.findByEmailCheckInRequest)
+
+	t.Nil(res)
+	t.Equal(expectedErr, err)
+}
+
+func (t *CheckinServiceTest) TestFindByUserIdSuccess() {
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
+
+	expectedResp := &proto.FindByUserIdCheckInResponse {
+		CheckIns: t.checkinsProto,
+	}
+
+	id := gomock.Any()
+
+	repo.EXPECT().FindByUserId(id, id).SetArg(1, t.checkinsModel).Return(nil)
+
+	res, err := svc.FindByUserId(context.Background(), t.findByUserIdCheckInRequest)
+
+	t.Nil(err)
+	t.Equal(expectedResp, res)
+}
+
+func (t *CheckinServiceTest) TestFindByUserIdInternalError() {
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
+
+	id := gomock.Any()
+
+	expectedErr := status.Error(codes.Internal, "internal error")
+	repo.EXPECT().FindByUserId(id, id).Return(expectedErr)
+
+	res, err := svc.FindByUserId(context.Background(), t.findByUserIdCheckInRequest)
 
 	t.Nil(res)
 	t.Equal(expectedErr, err)
