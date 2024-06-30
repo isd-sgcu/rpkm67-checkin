@@ -142,7 +142,7 @@ func (t *CheckinServiceTest) TestFindByUserIdInternalError() {
 	id := gomock.Any()
 
 	expectedErr := status.Error(codes.InvalidArgument, apperror.BadRequest.Error())
-	repo.EXPECT().FindByUserId(id, id).Return(expectedErr)
+	repo.EXPECT().FindByUserId(id, gomock.Any()).Return(expectedErr)
 
 	res, err := svc.FindByUserId(context.Background(), t.findByUserIdCheckInRequest)
 
