@@ -3,6 +3,7 @@ module github.com/isd-sgcu/rpkm67-checkin
 go 1.21.5
 
 require (
+	github.com/bxcodec/faker/v4 v4.0.0-beta.3
 	github.com/golang/mock v1.6.0
 	github.com/isd-sgcu/rpkm67-go-proto v0.2.0
 	github.com/isd-sgcu/rpkm67-model v0.0.4

@@ -1,6 +1,7 @@
-package tests
+package test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -13,12 +14,12 @@ import (
 
 type CheckinServiceTest struct {
 	suite.Suite
-	controller *gomock.Controller
-	logger *zap.Logger
-	checkinsProto []*proto.CheckIn
-	checkinProto *proto.CheckIn
-	createCheckInProtoRequest *proto.CreateCheckInRequest
-	findByEmailCheckInRequest *proto.FindByEmailCheckInRequest
+	controller 				   *gomock.Controller
+	logger 					   *zap.Logger
+	checkinsProto 			   []*proto.CheckIn
+	checkinProto 			   *proto.CheckIn
+	createCheckInProtoRequest  *proto.CreateCheckInRequest
+	findByEmailCheckInRequest  *proto.FindByEmailCheckInRequest
 	findByUserIdCheckInRequest *proto.FindByUserIdCheckInRequest
 }
 
@@ -29,17 +30,35 @@ func TestPinService(t *testing.T) {
 func (t *CheckinServiceTest) SetupTest() {
 	t.controller = gomock.NewController(t.T())
 	t.logger = zap.NewNop()
+	t.checkinProto = MockCheckInProto()
+	t.checkinsProto = MockCheckInsProto()
+	t.createCheckInProtoRequest = &proto.CreateCheckInRequest{
+		Email: t.checkinProto.Email,
+		UserId: t.checkinProto.UserId,
+		Event: t.checkinProto.Event,
+	}
+	t.findByEmailCheckInRequest = &proto.FindByEmailCheckInRequest{
+		Email: t.checkinProto.Email,
+	}
+	t.findByUserIdCheckInRequest = &proto.FindByUserIdCheckInRequest{
+		UserId: t.checkinProto.UserId,
+	}
 }
 
 func (t *CheckinServiceTest) TestCreateSuccess() {
-	repo := mock_checkin.NewMockRepository(t.controller)
+	repo := mock_checkin.NewMockRepository(t.controller)	
 	svc := checkin.NewService(repo, t.logger)
 
-	expected := &proto.CreateCheckInResponse {
-		CheckIn: &proto.CheckIn {
-			Id: "1", UserId: "1", Email: "1", Event: "1",
- 		},
+	expectedResp := &proto.CreateCheckInResponse{
+		CheckIn: t.checkinProto,
 	}
+	
+	repo.EXPECT().Create(gomock.Any()).Return(expectedResp, nil)
+
+	actual, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
+
+	t.Equal(actual, expectedResp)
+	t.Nil(err)
 
 }
 
