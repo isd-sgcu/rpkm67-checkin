@@ -97,6 +97,7 @@ func (s *serviceImpl) FindByUserId(_ context.Context, req *proto.FindByUserIdChe
 	err := s.repo.FindByUserId(req.UserId, &checkins)
 	if err != nil {
 		s.log.Named("FindByUserId").Error("FindByUserId: ", zap.Error(err))
+
 		if errors.Is(err, context.Canceled) {
 			return nil, status.Error(codes.Canceled, constant.RequestCancelledErrorMessage)
 		}
