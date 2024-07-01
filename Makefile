@@ -28,6 +28,7 @@ watch:
 
 mock-gen:
 	mockgen -source ./internal/checkin/checkin.service.go -destination ./mocks/checkin/checkin.service.go
+	mockgen -source ./internal/checkin/checkin.repository.go -destination ./mocks/checkin/checkin.repository.go
 
 test:
 	go vet ./...
