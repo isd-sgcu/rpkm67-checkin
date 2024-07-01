@@ -57,22 +57,6 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 		}
 		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage)
 	}
-	for _, v := range checkin_userIds {
-		if v.Event == req.Event && v.UserID == req.UserId {
-			return nil, status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
-		}
-	}
-	err = s.repo.Create(checkin)
-	if err != nil {
-		s.log.Named("Create").Error("Create: ", zap.Error(err))
-		if errors.Is(err, gorm.ErrInvalidDB) {
-			return nil, status.Error(codes.Internal, constant.DatabaseConnectionErrorMessage)
-		}
-		if errors.Is(err, gorm.ErrInvalidData) {
-			return nil, status.Error(codes.InvalidArgument, constant.InvalidDataErrorMessage)
-		}
-		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage)
-	}
 
 	return &proto.CreateCheckInResponse{
 		CheckIn: ModelToProto(checkin),
@@ -81,7 +65,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 
 func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailCheckInRequest) (*proto.FindByEmailCheckInResponse, error) {
 	if req.Email == "" {
-		s.log.Named("FindByUserEmail").Error("FindByUserEmail: invalid user ID")
+		s.log.Named("FindByUserEmail").Error("FindByUserEmail: invalid user Email")
 		return nil, status.Error(codes.InvalidArgument, constant.ArgumentEmptyErrorMessage)
 	}
 
