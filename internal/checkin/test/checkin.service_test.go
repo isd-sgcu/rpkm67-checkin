@@ -2,16 +2,18 @@ package test
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/isd-sgcu/rpkm67-checkin/constant"
 	"github.com/isd-sgcu/rpkm67-checkin/internal/checkin"
 	mock_checkin "github.com/isd-sgcu/rpkm67-checkin/mocks/checkin"
 	proto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
 	"github.com/isd-sgcu/rpkm67-model/model"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type CheckinServiceTest struct {
@@ -55,10 +57,11 @@ func (t *CheckinServiceTest) TestCreateSuccess() {
 	repo := mock_checkin.NewMockRepository(t.controller)	
 	svc := checkin.NewService(repo, t.logger)
 
-	expectedResp := &proto.CreateCheckInResponse{
+	expectedResp := &proto.CreateCheckInResponse {
 		CheckIn: t.checkinProto,
 	}
 	
+	repo.EXPECT().FindByUserId(gomock.Any(), gomock.Any()).Return(nil)
 	repo.EXPECT().Create(t.checkinModel).Return(nil)
 
 	res, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
@@ -72,13 +75,30 @@ func (t *CheckinServiceTest) TestCreateInternalError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
 	svc := checkin.NewService(repo, t.logger)
 
-	repo.EXPECT().Create(t.checkinModel).Return(errors.New("internal error"))
+	expectedErr := status.Error(codes.Internal, constant.InternalServerErrorMessage)
+
+	repo.EXPECT().FindByUserId(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 	res, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
 
 	t.Nil(res)
-	t.NotNil(err)
+	t.Equal(err, expectedErr)
 
+}
+
+func (t *CheckinServiceTest) TestCreateAlreadyCheckinError() {
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
+
+	expectedErr := status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
+
+	repo.EXPECT().FindByUserId(gomock.Any(), gomock.Any()).Return(nil)
+	repo.EXPECT().Create(gomock.Any()).Return(expectedErr)
+
+	res, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
+
+	t.Nil(res)
+	t.Equal(expectedErr, err)
 }
 
 func (t *CheckinServiceTest) TestFindByEmailSuccess() {
@@ -105,12 +125,13 @@ func (t *CheckinServiceTest) TestFindByEmailInternalError() {
 
 	email := t.checkinModel.Email
 
-	repo.EXPECT().FindByEmail(email, gomock.Any()).SetArg(1, t.checkinsModel).Return(errors.New("internal error"))
+	expectedErr := status.Error(codes.Internal, constant.InternalServerErrorMessage)
+	repo.EXPECT().FindByEmail(email, gomock.Any()).SetArg(1, t.checkinsModel).Return(expectedErr)
 
 	res, err := svc.FindByEmail(context.Background(), t.findByEmailCheckInRequest)
 
 	t.Nil(res)
-	t.NotNil(err)
+	t.Equal(err, expectedErr)
 }
 
 func (t *CheckinServiceTest) TestFindByUserIdSuccess() {
@@ -121,9 +142,7 @@ func (t *CheckinServiceTest) TestFindByUserIdSuccess() {
 		CheckIns: t.checkinsProto,
 	}
 
-	id := gomock.Any()
-
-	repo.EXPECT().FindByUserId(id, id).SetArg(1, t.checkinsModel).Return(nil)
+	repo.EXPECT().FindByUserId(gomock.Any(), gomock.Any()).SetArg(1, t.checkinsModel).Return(nil)
 
 	res, err := svc.FindByUserId(context.Background(), t.findByUserIdCheckInRequest)
 
@@ -137,10 +156,11 @@ func (t *CheckinServiceTest) TestFindByUserIdInternalError() {
 
 	id := gomock.Any()
 
-	repo.EXPECT().FindByUserId(id, gomock.Any()).Return(errors.New("internal error"))
+	expectedErr := status.Error(codes.Internal, constant.InternalServerErrorMessage)
+	repo.EXPECT().FindByUserId(id, gomock.Any()).Return(expectedErr)
 
 	res, err := svc.FindByUserId(context.Background(), t.findByUserIdCheckInRequest)
 
 	t.Nil(res)
-	t.NotNil(err)
+	t.Equal(err, expectedErr)
 }
