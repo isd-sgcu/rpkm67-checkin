@@ -49,12 +49,15 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 	err = s.repo.Create(checkin)
 	if err != nil {
 		s.log.Named("Create").Error("Create: ", zap.Error(err))
+		if status.Code(err) == codes.AlreadyExists {
+            return nil, status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
+        }
 		if errors.Is(err, gorm.ErrInvalidDB) {
 			return nil, status.Error(codes.Internal, constant.DatabaseConnectionErrorMessage)
 		}
-		if errors.Is(err, gorm.ErrInvalidData) {
-			return nil, status.Error(codes.InvalidArgument, constant.InvalidDataErrorMessage)
-		}
+		if status.Code(err) == codes.InvalidArgument {
+            return nil, status.Error(codes.InvalidArgument, constant.InvalidDataErrorMessage)
+        }
 		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage)
 	}
 
@@ -73,7 +76,7 @@ func (s *serviceImpl) FindByEmail(_ context.Context, req *proto.FindByEmailCheck
 	err := s.repo.FindByEmail(req.Email, &checkins)
 	if err != nil {
 		s.log.Named("FindByEmail").Error("FindByEmail: ", zap.Error(err))
-		if errors.Is(err, context.Canceled) {
+		if status.Code(err) == codes.Canceled {
 			return nil, status.Error(codes.Canceled, constant.RequestCancelledErrorMessage)
 		}
 		if errors.Is(err, gorm.ErrInvalidDB) {
@@ -98,7 +101,7 @@ func (s *serviceImpl) FindByUserId(_ context.Context, req *proto.FindByUserIdChe
 	if err != nil {
 		s.log.Named("FindByUserId").Error("FindByUserId: ", zap.Error(err))
 
-		if errors.Is(err, context.Canceled) {
+		if status.Code(err) == codes.Canceled {
 			return nil, status.Error(codes.Canceled, constant.RequestCancelledErrorMessage)
 		}
 		if errors.Is(err, gorm.ErrInvalidDB) {

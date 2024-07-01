@@ -101,6 +101,21 @@ func (t *CheckinServiceTest) TestCreateAlreadyCheckinError() {
 	t.Equal(expectedErr, err)
 }
 
+func (t *CheckinServiceTest) TestCreateInvalidArgumentError() {
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
+
+	expectedErr := status.Error(codes.InvalidArgument, constant.InvalidDataErrorMessage)
+
+	repo.EXPECT().FindByUserId(gomock.Any(), gomock.Any()).Return(nil)
+	repo.EXPECT().Create(gomock.Any()).Return(expectedErr)
+
+	res, err := svc.Create(context.Background(), t.createCheckInProtoRequest)
+
+	t.Nil(res)
+	t.Equal(expectedErr, err)
+}
+
 func (t *CheckinServiceTest) TestFindByEmailSuccess() {
 	repo := mock_checkin.NewMockRepository(t.controller)
 	svc := checkin.NewService(repo, t.logger)
@@ -134,6 +149,21 @@ func (t *CheckinServiceTest) TestFindByEmailInternalError() {
 	t.Equal(err, expectedErr)
 }
 
+func (t *CheckinServiceTest) TestFindByEmailRequestCanceledError() {
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
+
+	email := t.checkinModel.Email
+
+	expectedErr := status.Error(codes.Canceled, constant.RequestCancelledErrorMessage)
+	repo.EXPECT().FindByEmail(email, gomock.Any()).SetArg(1, t.checkinsModel).Return(expectedErr)
+
+	res, err := svc.FindByEmail(context.Background(), t.findByEmailCheckInRequest)
+
+	t.Nil(res)
+	t.Equal(err, expectedErr)
+}
+
 func (t *CheckinServiceTest) TestFindByUserIdSuccess() {
 	repo := mock_checkin.NewMockRepository(t.controller)
 	svc := checkin.NewService(repo, t.logger)
@@ -154,10 +184,21 @@ func (t *CheckinServiceTest) TestFindByUserIdInternalError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
 	svc := checkin.NewService(repo, t.logger)
 
-	id := gomock.Any()
-
 	expectedErr := status.Error(codes.Internal, constant.InternalServerErrorMessage)
-	repo.EXPECT().FindByUserId(id, gomock.Any()).Return(expectedErr)
+	repo.EXPECT().FindByUserId(gomock.Any(), gomock.Any()).Return(expectedErr)
+
+	res, err := svc.FindByUserId(context.Background(), t.findByUserIdCheckInRequest)
+
+	t.Nil(res)
+	t.Equal(err, expectedErr)
+}
+
+func (t *CheckinServiceTest) TestFindByUserIdRequestCanceledError() {
+	repo := mock_checkin.NewMockRepository(t.controller)
+	svc := checkin.NewService(repo, t.logger)
+
+	expectedErr := status.Error(codes.Canceled, constant.RequestCancelledErrorMessage)
+	repo.EXPECT().FindByUserId(gomock.Any(), gomock.Any()).Return(expectedErr)
 
 	res, err := svc.FindByUserId(context.Background(), t.findByUserIdCheckInRequest)
 
