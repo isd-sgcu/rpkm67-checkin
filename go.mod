@@ -5,11 +5,10 @@ go 1.21.5
 require (
 	github.com/bxcodec/faker/v4 v4.0.0-beta.3
 	github.com/golang/mock v1.6.0
-	github.com/isd-sgcu/rpkm67-gateway v0.0.0-20240630114306-57e091f0013c
-	github.com/isd-sgcu/rpkm67-go-proto v0.2.2
+	github.com/isd-sgcu/rpkm67-go-proto v0.4.6
 	github.com/isd-sgcu/rpkm67-model v0.0.4
 	github.com/stretchr/testify v1.9.0
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.65.0
 	gorm.io/gorm v1.25.10
 )
 
