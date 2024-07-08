@@ -17,6 +17,6 @@ COPY --from=builder /app/server ./
 
 ENV GO_ENV production
 
-EXPOSE 3000
+EXPOSE 3004
 
 CMD ["./server"]
