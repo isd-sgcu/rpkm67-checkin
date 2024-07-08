@@ -43,21 +43,25 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 	}
 	for _, v := range checkin_userIds {
 		if v.Event == req.Event && v.UserID == req.UserId {
-			return nil, status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
+			s.log.Named("Create").Warn("Create: User already checkin this event")
+
+			return &proto.CreateCheckInResponse{
+				CheckIn: ModelToProto(checkin),
+			}, nil
 		}
 	}
 	err = s.repo.Create(checkin)
 	if err != nil {
 		s.log.Named("Create").Error("Create: ", zap.Error(err))
 		if status.Code(err) == codes.AlreadyExists {
-            return nil, status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
-        }
+			return nil, status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
+		}
 		if errors.Is(err, gorm.ErrInvalidDB) {
 			return nil, status.Error(codes.Internal, constant.DatabaseConnectionErrorMessage)
 		}
 		if status.Code(err) == codes.InvalidArgument {
-            return nil, status.Error(codes.InvalidArgument, constant.InvalidDataErrorMessage)
-        }
+			return nil, status.Error(codes.InvalidArgument, constant.InvalidDataErrorMessage)
+		}
 		return nil, status.Error(codes.Internal, constant.InternalServerErrorMessage)
 	}
 
