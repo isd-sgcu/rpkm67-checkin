@@ -45,9 +45,7 @@ func (s *serviceImpl) Create(_ context.Context, req *proto.CreateCheckInRequest)
 		if v.Event == req.Event && v.UserID == req.UserId {
 			s.log.Named("Create").Warn("Create: User already checkin this event")
 
-			return &proto.CreateCheckInResponse{
-				CheckIn: ModelToProto(checkin),
-			}, nil
+			return nil, status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
 		}
 	}
 	err = s.repo.Create(checkin)
