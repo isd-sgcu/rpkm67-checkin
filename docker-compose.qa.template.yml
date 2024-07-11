@@ -44,7 +44,7 @@ services:
       - ./microservices/auth:/app/config/staffs
     ports:
       - "3002:3002"
-  
+
   backend:
     image: ghcr.io/isd-sgcu/rpkm67-backend:latest
     container_name: backend
@@ -128,7 +128,7 @@ services:
     container_name: prometheus
     restart: unless-stopped
     networks:
-      - rpkm67 
+      - rpkm67
     volumes:
       - ./microservices/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -146,6 +146,30 @@ services:
       - ./volumes/grafana:/var/lib/grafana
     ports:
       - "3006:3000"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.104.0
+    command: ["--config=/etc/opentelemetry.yml"]
+    volumes:
+      - ./microservices/opentelemetry/opentelemetry.yml:/etc/opentelemetry.yml
+    ports:
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP HTTP receiver
+    networks:
+      - rpkm67
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - 9091:16686 # Jaeger UI
+      - 14250:14250 # Jaeger gRPC collector
+      - 14268:14268 # Jaeger HTTP collector
+    networks:
+      - rpkm67
 
 networks:
   rpkm67:
