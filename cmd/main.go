@@ -14,7 +14,6 @@ import (
 	"github.com/isd-sgcu/rpkm67-checkin/database"
 	"github.com/isd-sgcu/rpkm67-checkin/internal/checkin"
 	"github.com/isd-sgcu/rpkm67-checkin/logger"
-	"github.com/isd-sgcu/rpkm67-checkin/tracer"
 	checkinProto "github.com/isd-sgcu/rpkm67-go-proto/rpkm67/checkin/checkin/v1"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/zap"
@@ -32,25 +31,27 @@ func main() {
 
 	logger := logger.New(conf)
 
-	tp, err := tracer.New(conf)
-	if err != nil {
-		panic(fmt.Sprintf("Failed to create tracer: %v", err))
-	}
-	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
-			panic(fmt.Sprintf("Failed to shutdown tracer: %v", err))
-		}
-	}()
+	// tp, err := tracer.New(conf)
+	// if err != nil {
+	// 	panic(fmt.Sprintf("Failed to create tracer: %v", err))
+	// }
+	// defer func() {
+	// 	if err := tp.Shutdown(context.Background()); err != nil {
+	// 		panic(fmt.Sprintf("Failed to shutdown tracer: %v", err))
+	// 	}
+	// }()
 
-	tracer := tp.Tracer("rpkm67-checkin")
+	// tracer := tp.Tracer("rpkm67-checkin")
 
 	db, err := database.InitDatabase(&conf.Db, conf.App.IsDevelopment())
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
-	checkinRepo := checkin.NewRepository(db, tracer)
-	checkinSvc := checkin.NewService(checkinRepo, logger.Named("checkinSvc"), tracer)
+	// checkinRepo := checkin.NewRepository(db, tracer)
+	// checkinSvc := checkin.NewService(checkinRepo, logger.Named("checkinSvc"), tracer)
+	checkinRepo := checkin.NewRepository(db)
+	checkinSvc := checkin.NewService(checkinRepo, logger.Named("checkinSvc"))
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%v", conf.App.Port))
 	if err != nil {
