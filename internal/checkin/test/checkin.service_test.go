@@ -64,7 +64,8 @@ func (t *CheckinServiceTest) SetupTest() {
 
 func (t *CheckinServiceTest) TestCreateSuccess() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	expectedResp := &proto.CreateCheckInResponse{
 		CheckIn: t.checkinProto,
@@ -82,7 +83,8 @@ func (t *CheckinServiceTest) TestCreateSuccess() {
 
 func (t *CheckinServiceTest) TestCreateInternalError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	expectedErr := status.Error(codes.Internal, constant.InternalServerErrorMessage)
 
@@ -97,7 +99,8 @@ func (t *CheckinServiceTest) TestCreateInternalError() {
 
 func (t *CheckinServiceTest) TestCreateAlreadyCheckinError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	expectedErr := status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
 
@@ -112,7 +115,8 @@ func (t *CheckinServiceTest) TestCreateAlreadyCheckinError() {
 
 func (t *CheckinServiceTest) TestCreateInvalidArgumentError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	expectedErr := status.Error(codes.InvalidArgument, constant.InvalidDataErrorMessage)
 
@@ -127,7 +131,8 @@ func (t *CheckinServiceTest) TestCreateInvalidArgumentError() {
 
 func (t *CheckinServiceTest) TestFindByEmailSuccess() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	expectedResp := &proto.FindByEmailCheckInResponse{
 		CheckIns: t.checkinsProto,
@@ -145,7 +150,8 @@ func (t *CheckinServiceTest) TestFindByEmailSuccess() {
 
 func (t *CheckinServiceTest) TestFindByEmailInternalError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	email := t.checkinModel.Email
 
@@ -160,7 +166,8 @@ func (t *CheckinServiceTest) TestFindByEmailInternalError() {
 
 func (t *CheckinServiceTest) TestFindByEmailRequestCanceledError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	expectedErr := status.Error(codes.Canceled, constant.RequestCancelledErrorMessage)
 	repo.EXPECT().FindByEmail(gomock.Any(), t.checkinModel.Email, gomock.Any()).SetArg(2, t.checkinsModel).Return(expectedErr)
@@ -173,7 +180,8 @@ func (t *CheckinServiceTest) TestFindByEmailRequestCanceledError() {
 
 func (t *CheckinServiceTest) TestFindByUserIdSuccess() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	expectedResp := &proto.FindByUserIdCheckInResponse{
 		CheckIns: t.checkinsProto,
@@ -189,7 +197,8 @@ func (t *CheckinServiceTest) TestFindByUserIdSuccess() {
 
 func (t *CheckinServiceTest) TestFindByUserIdInternalError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	expectedErr := status.Error(codes.Internal, constant.InternalServerErrorMessage)
 	repo.EXPECT().FindByUserId(gomock.Any(), t.checkinModel.UserID, gomock.Any()).Return(expectedErr)
@@ -202,7 +211,8 @@ func (t *CheckinServiceTest) TestFindByUserIdInternalError() {
 
 func (t *CheckinServiceTest) TestFindByUserIdRequestCanceledError() {
 	repo := mock_checkin.NewMockRepository(t.controller)
-	svc := checkin.NewService(repo, t.logger, t.tracer)
+	// svc := checkin.NewService(repo, t.logger, t.tracer)
+	svc := checkin.NewService(repo, t.logger)
 
 	expectedErr := status.Error(codes.Canceled, constant.RequestCancelledErrorMessage)
 	repo.EXPECT().FindByUserId(gomock.Any(), t.checkinModel.UserID, gomock.Any()).Return(expectedErr)
