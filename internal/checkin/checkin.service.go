@@ -52,7 +52,9 @@ func (s *serviceImpl) Create(ctx context.Context, req *proto.CreateCheckInReques
 		if v.Event == req.Event && v.UserID == req.UserId {
 			s.log.Named("Create").Warn("Create: User already checkin this event")
 
-			return nil, status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
+			return &proto.CreateCheckInResponse{
+				CheckIn: ModelToProto(v),
+			}, nil
 		}
 	}
 	// span.AddEvent("Verify user checkin not duplicate")
