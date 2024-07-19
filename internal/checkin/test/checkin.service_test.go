@@ -47,7 +47,7 @@ func (t *CheckinServiceTest) SetupTest() {
 	t.logger = zap.NewNop()
 	t.checkinsModel = MockCheckInsModel()
 	t.checkinModel = t.checkinsModel[0]
-	t.checkinsProto = checkin.ModelToProtoList(t.checkinsModel)
+	t.checkinsProto = checkin.ModelToProtoList(t.checkinsModel, false)
 	t.checkinProto = t.checkinsProto[0]
 	t.createCheckInProtoRequest = &proto.CreateCheckInRequest{
 		Email:  t.checkinProto.Email,

@@ -5,19 +5,21 @@ import (
 	"github.com/isd-sgcu/rpkm67-model/model"
 )
 
-func ModelToProto(in *model.CheckIn) *proto.CheckIn {
+func ModelToProto(in *model.CheckIn, isDuplicate bool) *proto.CheckIn {
 	return &proto.CheckIn{
-		Id:     in.ID.String(),
-		Email:  in.Email,
-		Event:  in.Event,
-		UserId: in.UserID,
+		Id:          in.ID.String(),
+		Email:       in.Email,
+		Event:       in.Event,
+		UserId:      in.UserID,
+		Timestamp:   in.CreatedAt.String(),
+		IsDuplicate: isDuplicate,
 	}
 }
 
-func ModelToProtoList(in []*model.CheckIn) []*proto.CheckIn {
+func ModelToProtoList(in []*model.CheckIn, isDuplicate bool) []*proto.CheckIn {
 	var out []*proto.CheckIn
 	for _, v := range in {
-		out = append(out, ModelToProto(v))
+		out = append(out, ModelToProto(v, isDuplicate))
 	}
 	return out
 }
