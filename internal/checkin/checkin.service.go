@@ -50,9 +50,11 @@ func (s *serviceImpl) Create(ctx context.Context, req *proto.CreateCheckInReques
 	}
 	for _, v := range checkin_userIds {
 		if v.Event == req.Event && v.UserID == req.UserId {
-			s.log.Named("Create").Error("Create: User already checkin this event")
+			s.log.Named("Create").Warn("Create: User already checkin this event")
 
-			return nil, status.Error(codes.AlreadyExists, constant.AlreadyCheckinErrorMessage)
+			return &proto.CreateCheckInResponse{
+				CheckIn: ModelToProto(v, true),
+			}, nil
 		}
 	}
 	// span.AddEvent("Verify user checkin not duplicate")
@@ -74,7 +76,7 @@ func (s *serviceImpl) Create(ctx context.Context, req *proto.CreateCheckInReques
 	// span.AddEvent("Checkin created")
 
 	return &proto.CreateCheckInResponse{
-		CheckIn: ModelToProto(checkin),
+		CheckIn: ModelToProto(checkin, false),
 	}, nil
 }
 
@@ -106,7 +108,7 @@ func (s *serviceImpl) FindByEmail(ctx context.Context, req *proto.FindByEmailChe
 	// span.AddEvent("Checkin found")
 
 	return &proto.FindByEmailCheckInResponse{
-		CheckIns: ModelToProtoList(checkins),
+		CheckIns: ModelToProtoList(checkins, false),
 	}, nil
 }
 
@@ -139,6 +141,6 @@ func (s *serviceImpl) FindByUserId(ctx context.Context, req *proto.FindByUserIdC
 	}
 
 	return &proto.FindByUserIdCheckInResponse{
-		CheckIns: ModelToProtoList(checkins),
+		CheckIns: ModelToProtoList(checkins, false),
 	}, nil
 }
